@@ -4,19 +4,25 @@ import { Observable, Subject } from 'rxjs';
 import { Client, IMessage } from '@stomp/stompjs';
 import { ChatMessage } from '../models/chat-message.model';
 
+// Use localhost for local development, or update with production backend URL
+const isLocal = window.location.hostname === 'localhost';
+const BACKEND_URL = isLocal ? 'localhost:8080' : 'YOUR_RENDER_APP.onrender.com';
+const WS_SCHEME = isLocal ? 'ws' : 'wss';
+const HTTP_SCHEME = isLocal ? 'http' : 'https';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
   private stompClient: Client | null = null;
   private messageSubject = new Subject<ChatMessage>();
-  private apiUrl = 'http://localhost:8080/api/messages';
+  private apiUrl = `${HTTP_SCHEME}://${BACKEND_URL}/api/messages`;
 
   constructor(private http: HttpClient) {}
 
   public connect(username: string): Observable<ChatMessage> {
     this.stompClient = new Client({
-      brokerURL: 'ws://localhost:8080/ws-direct',
+      brokerURL: `${WS_SCHEME}://${BACKEND_URL}/ws-direct`,
       reconnectDelay: 5000,
       debug: (str) => {
         console.log('[STOMP]', str);
