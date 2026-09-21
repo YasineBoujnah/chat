@@ -1,0 +1,62 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, Subject } from 'rxjs';
+import { Client, IMessage } from '@stomp/stompjs';
+import { ChatMessage } from '../models/chat-message.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ChatService {
+  private stompClient: Client | null = null;
+  private messageSubject = new Subject<ChatMessage>();
+  private apiUrl = 'http://localhost:8080/api/messages';
+
+  constructor(private http: HttpClient) {}
+
+  public connect(username: string): Observable<ChatMessage> {
+    this.stompClient = new Client({
+      brokerURL: 'ws://localhost:8080/ws-direct',
+      reconnectDelay: 5000,
+      debug: (str) => {
+        console.log('[STOMP]', str);
+      }
+    });
+
+    this.stompClient.onConnect = () => {
+      this.stompClient?.subscribe('/topic/public', (message: IMessage) => {
+        if (message.body) {
+          const chatMsg: ChatMessage = JSON.parse(message.body);
+          this.messageSubject.next(chatMsg);
+        }
+      });
+
+      this.stompClient?.publish({
+        destination: '/app/chat.addUser',
+        body: JSON.stringify({ sender: username, type: 'JOIN', content: `${username} joined the chat.` })
+      });
+    };
+
+    this.stompClient.activate();
+    return this.messageSubject.asObservable();
+  }
+
+  public sendMessage(message: ChatMessage): void {
+    if (this.stompClient && this.stompClient.connected) {
+      this.stompClient.publish({
+        destination: '/app/chat.sendMessage',
+        body: JSON.stringify(message)
+      });
+    }
+  }
+
+  public getHistory(): Observable<ChatMessage[]> {
+    return this.http.get<ChatMessage[]>(this.apiUrl);
+  }
+
+  public disconnect(): void {
+    if (this.stompClient !== null) {
+      this.stompClient.deactivate();
+    }
+  }
+}

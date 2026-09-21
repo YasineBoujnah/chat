@@ -1,0 +1,54 @@
+<div class="chat-wrapper">
+  <div *ngIf="!usernameSubmitted" class="login-card">
+    <div class="header-icon">💬</div>
+    <h2>Real-Time Chat</h2>
+    <p>Enter your username to join the 1-on-1 chat</p>
+    <div class="input-group">
+      <input
+        type="text"
+        [(ngModel)]="username"
+        (keyup.enter)="joinChat()"
+        placeholder="Enter your nickname..."
+        autofocus
+      />
+      <button (click)="joinChat()" [disabled]="!username.trim()">Join Chat</button>
+    </div>
+  </div>
+
+  <div *ngIf="usernameSubmitted" class="chat-container">
+    <header class="chat-header">
+      <div class="user-info">
+        <span class="status-dot"></span>
+        <div class="user-details">
+          <h3>Real-Time Room</h3>
+          <span class="current-user">Logged in as <strong>{{ username }}</strong></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="messages-area" #messagesContainer>
+      <div *ngFor="let msg of messages" class="message-row" [ngClass]="{'outgoing': isMyMessage(msg), 'incoming': !isMyMessage(msg), 'system': msg.type === 'JOIN' || msg.type === 'LEAVE'}">
+        <div *ngIf="msg.type === 'CHAT'" class="bubble">
+          <span class="sender-name" *ngIf="!isMyMessage(msg)">{{ msg.sender }}</span>
+          <div class="message-text">{{ msg.content }}</div>
+          <span class="timestamp" *ngIf="msg.timestamp">{{ formatTime(msg.timestamp) }}</span>
+        </div>
+        <div *ngIf="msg.type === 'JOIN' || msg.type === 'LEAVE'" class="system-notification">
+          <span>{{ msg.content }}</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="chat-footer">
+      <input
+        type="text"
+        [(ngModel)]="messageContent"
+        (keyup)="onKeyUp($event)"
+        placeholder="Type a message..."
+      />
+      <button (click)="sendMessage()" [disabled]="!messageContent.trim()">
+        Send
+      </button>
+    </footer>
+  </div>
+</div>
