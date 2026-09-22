@@ -8,18 +8,25 @@ A simple, fast, and real-time chat application for 2 users, built from scratch.
 - **Database:** MySQL
 - **Build Tools:** Gradle (Backend), npm/Angular CLI (Frontend)
 
-## 📋 Prerequisites
-- **Node.js & npm** (for the frontend)
-- **Java 17+** (for the backend)
-- **MySQL / XAMPP** running on port `3306`
+## ☁️ Cloud Deployment Configuration
 
-## 🗄️ Database Setup
-The application connects to MySQL via `localhost:3306`.
+This backend is pre-configured to be deployed easily using environment variables.
+
+When deploying the backend (e.g., on Render or Heroku), make sure to configure the following environment variables:
+- `DB_URL`: The full JDBC url string (e.g., `jdbc:mysql://host:port/dbname?sslMode=REQUIRED`)
+- `DB_USER`: Your cloud database username
+- `DB_PASS`: Your cloud database password
+
+For the frontend, the app defaults to `localhost`. When deploying to Vercel/Netlify, update the `BACKEND_URL` in `chat.service.ts` to your production backend URL.
+
+## 🗄️ Local Database Setup
+The application connects to MySQL via `localhost:3306` by default.
 - **Username:** `root`
 - **Password:** *(empty by default for XAMPP)*
-*(You can modify these settings in `backend/src/main/resources/application.properties`)*
 
-## 🚀 How to Run
+*(Settings are located in `backend/src/main/resources/application.properties`)*
+
+## 🚀 How to Run Locally
 
 ### 1. Start the Backend (Spring Boot)
 Open a terminal and run:
